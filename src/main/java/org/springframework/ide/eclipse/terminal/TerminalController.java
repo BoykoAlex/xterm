@@ -15,19 +15,19 @@ public class TerminalController {
 	@GetMapping("/terminal/{id}")
 	public String terminal(
 			@PathVariable() String id,
-			@RequestParam(required = false) String shellCommand,
+			@RequestParam(required = false) String cmd,
 			@RequestParam(required = false) String cwd,
 			Model model) {
-		String[] shellCmdArray;
+		String[] cmdArray;
 		Assert.hasText(id, "Id for the terminal must be provided");
-		if (shellCommand != null && !shellCommand.trim().isEmpty()) {
-			shellCmdArray = shellCommand.trim().split("\\s+");
+		if (cmd != null && !cmd.trim().isEmpty()) {
+			cmdArray = cmd.trim().split("\\s+");
 		} else {
-			shellCmdArray = defaultShellCommand();
+			cmdArray = defaultShellCommand();
 		}
 		model.addAttribute("cwd", cwd);
 		model.addAttribute("id", id);
-		model.addAttribute("shellCommand", shellCmdArray);
+		model.addAttribute("cmd", cmdArray);
 		return TERMINAL;
 	}
 	
