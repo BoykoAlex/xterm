@@ -74,9 +74,10 @@ function startTerminal(elementId, session, wsUrl, theme) {
     };
 
 	let previousData = '';
-	const is_eclipse_mac0xs_browser = typeof window.navigator.userAgent === 'string' && window.navigator.userAgent.indexOf("Safari/522.0") >= 0; 
+	const is_eclipse_buggy_browser = typeof window.navigator.userAgent === 'string'
+		&& (window.navigator.userAgent.indexOf("Safari/522.0") >= 0 || window.navigator.userAgent.indexOf("Windows NT 6.2") >= 0); 
     terminal.onData(function(data) {
-		if (is_eclipse_mac0xs_browser) {
+		if (is_eclipse_buggy_browser) {
 			if (data.length === 1 && data === previousData) {
 				// Workaround double input on eclipse browser on mac
 				// skip - don't send the message. Let the next message however

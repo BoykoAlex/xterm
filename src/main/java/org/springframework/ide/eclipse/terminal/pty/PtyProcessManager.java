@@ -43,7 +43,7 @@ public class PtyProcessManager {
 			}
 		}
 		
-		PtyProcess pty = PtyProcess.exec(cmd, System.getenv(), cwd, false, true, null);
+		PtyProcess pty = PtyProcess.exec(cmd, System.getenv(), cwd, false, false, null);
 		PtyProcessInfo processInfo = new PtyProcessInfo(pty, id, taskExecutor);
 		
 		taskExecutor.createThread(() -> {

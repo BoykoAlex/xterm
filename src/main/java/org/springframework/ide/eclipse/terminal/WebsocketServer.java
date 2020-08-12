@@ -95,7 +95,7 @@ public class WebsocketServer implements WebSocketConfigurer, InitializingBean {
 					case Message.INIT_TYPE:
 						String cwd = null;
 						List<String> ptyParams = new ArrayList<>();
-						ptyParams.add("--login");
+//						ptyParams.add("--login");
 						InitParams initParams = msg.getInitParams();
 						if (initParams != null) {
 							cwd = initParams.getCwd();
@@ -113,7 +113,6 @@ public class WebsocketServer implements WebSocketConfigurer, InitializingBean {
 			            processInfo = ptyProcessManager.get(msg.getId());
 			            if (processInfo != null) {
 				            byte[] dataBytes = msg.getData().getBytes();
-//				            ptyProcessManager.broadcastData(processInfo, dataBytes);
 							processInfo.getPty().getOutputStream().write(dataBytes, 0, dataBytes.length);
 							processInfo.getPty().getOutputStream().flush();
 			            }
