@@ -95,9 +95,9 @@ public class PtyProcessManager {
 	}
 	
 	private synchronized boolean terminatePty(String id) {
-		log.info("Attempt to terminate pty process for id=" + id);
 		PtyProcessInfo ptyProcessInfo = processes.get(id);
 		if (ptyProcessInfo != null && ptyProcessInfo.sockets.isEmpty()) {
+			log.info("Terminating pty process for id=" + id);
 			ptyProcessInfo.getPty().destroy();
 			processes.remove(id);
 			return true;
@@ -111,6 +111,10 @@ public class PtyProcessManager {
 			processInfo.terminationFuture = null;
 		}
 		processInfo.sockets.add(ws);
+	}
+
+	public boolean isEmpty() {
+		return processes.isEmpty();
 	}
 
 }
