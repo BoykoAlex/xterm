@@ -21,7 +21,7 @@
     <script th:inline="javascript">
     
     	const id = [[${id}]];
-    	const shellCommand = [[${shellCommand}]];
+    	const cmd = [[${cmd}]];
     	const cwd = [[${cwd}]];
     	
         document.addEventListener('DOMContentLoaded', function() {
@@ -29,7 +29,7 @@
             		'terminal',
             		id,
             		`${window.location.protocol.replace('http', 'ws')}//${window.location.host}/websocket`,
-            		shellCommand,
+            		cmd,
             		cwd
             );
         });
