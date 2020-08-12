@@ -15,18 +15,14 @@
  */
  package org.springframework.ide.eclipse.terminal;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.annotation.Bean;
-import org.springframework.ide.eclipse.terminal.model.InitParams;
 import org.springframework.ide.eclipse.terminal.model.Message;
 import org.springframework.ide.eclipse.terminal.pty.PtyProcessInfo;
 import org.springframework.ide.eclipse.terminal.pty.PtyProcessManager;
-import org.springframework.stereotype.Controller;
+import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketHandler;
@@ -35,26 +31,14 @@ import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
 import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.pty4j.WinSize;
 
-@Controller
+@Component
 public class WebsocketServer implements WebSocketConfigurer, InitializingBean {
 		
 	private static final Logger log = LoggerFactory.getLogger(WebsocketServer.class);
 	
-	private Gson gson;
-
 	private PtyProcessManager ptyProcessManager;
-	
-	private void initializeGson() {
-		if (gson == null) {
-			GsonBuilder builder = new GsonBuilder();
-//			ActionTypeAdapter.configureGson(builder);
-			gson = builder.create();
-		}
-	}
 	
 	public WebsocketServer(PtyProcessManager ptyProcessManager) {
 		this.ptyProcessManager = ptyProcessManager;
@@ -62,10 +46,6 @@ public class WebsocketServer implements WebSocketConfigurer, InitializingBean {
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		initializeGson();
-//		diagramServers.setRemoteEndpoint((fromServerId, message) -> {
-//			sendMessageToClient(fromServerId, (JsonObject)gson.toJsonTree(message));
-//		});
 	}
 
 	@Override
@@ -93,20 +73,7 @@ public class WebsocketServer implements WebSocketConfigurer, InitializingBean {
 					PtyProcessInfo processInfo;
 					switch (msg.getType()) {
 					case Message.INIT_TYPE:
-						String cwd = null;
-						List<String> ptyParams = new ArrayList<>();
-//						ptyParams.add("--login");
-						InitParams initParams = msg.getInitParams();
-						if (initParams != null) {
-							cwd = initParams.getCwd();
-							if (initParams.getPtyParams() != null) {
-								ptyParams.addAll(initParams.getPtyParams());
-							}
-							ptyParams = initParams.getPtyParams();
-						}
-			            processInfo = ptyProcessManager.createOrConnect(session, msg.getId(), cwd, ptyParams);
-		                // Initial message for the session. Has the the session id only.
-		                // Reply is send current pty content if any
+			            processInfo = ptyProcessManager.createOrConnect(session, msg.getId(), msg.getCmd(), msg.getCwd());
 			            session.sendMessage(new TextMessage(Message.dataMessage(msg.getId(), String.join("", processInfo.getBuffer())).toString()));
 			            break;
 					case Message.DATA_TYPE:
@@ -147,5 +114,4 @@ public class WebsocketServer implements WebSocketConfigurer, InitializingBean {
 		};
 	}
 	
-
 }

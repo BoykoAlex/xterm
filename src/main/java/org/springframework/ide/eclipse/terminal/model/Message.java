@@ -1,5 +1,7 @@
 package org.springframework.ide.eclipse.terminal.model;
 
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,8 +26,9 @@ public class Message {
 	private String type;
 	private String id;
 	private String data;
+	private List<String> cmd;
+	private String cwd;
 	private Size size;
-	private InitParams initParams;
 	
 	public String getData() {
 		return data;
@@ -67,13 +70,20 @@ public class Message {
 		this.size = size;
 	}
 	
-
-	public InitParams getInitParams() {
-		return initParams;
+	public List<String> getCmd() {
+		return cmd;
 	}
 
-	public void setInitParams(InitParams initParams) {
-		this.initParams = initParams;
+	public void setCmd(List<String> shellCommand) {
+		this.cmd = shellCommand;
+	}
+
+	public String getCwd() {
+		return cwd;
+	}
+
+	public void setCwd(String cwd) {
+		this.cwd = cwd;
 	}
 
 	@Override

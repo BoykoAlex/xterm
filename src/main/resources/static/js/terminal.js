@@ -1,9 +1,9 @@
-function resizeTerminal(terminal, fitAddon, ws, session) {
+function resizeTerminal(terminal, fitAddon, ws, id) {
     if (terminal.element.clientWidth > 0 && terminal.element.clientHeight > 0) {
         fitAddon.fit();
         ws.send(JSON.stringify({
             type: 'size',
-            id: session,
+            id: id,
             size: {
             	cols: terminal.cols,
             	rows: terminal.rows
@@ -19,15 +19,7 @@ function ping(ws) {
     }
 }
 
-let started = false;
-
-function startTerminal(elementId, session, wsUrl, theme) {
-
-	if (started) {
-		return
-	} else {
-		started = true;
-	}
+function startTerminal(elementId, id, wsUrl, cmd, cwd, theme) {
 
     const terminal = new Terminal({
         cursorBlink: true,
@@ -49,7 +41,9 @@ function startTerminal(elementId, session, wsUrl, theme) {
         // ws.send("Message to send");
         ws.send(JSON.stringify({
             type: 'init',
-            id: session
+            id: id,
+            cmd: cmd,
+            cwd: cwd
         }));
 
         // Setup periodic ping messages
@@ -57,15 +51,15 @@ function startTerminal(elementId, session, wsUrl, theme) {
 
         // Send initial size of the terminal for the pty process to adjust
         // Unless the size of the parent element is 0
-        resizeTerminal(terminal, fitAddon, ws, session);
+        resizeTerminal(terminal, fitAddon, ws, id);
     };
 
     ws.onmessage = function (evt) {
         const message = JSON.parse(evt.data);
-        if (message.id === session) {
+        if (message.id === id) {
             terminal.write(message.data);
         } else {
-            console.warning("Client session " + session + " received message for session " + message.id);
+            console.warning("Client id " + id + " received message for id " + message.id);
         }
     };
 
@@ -90,7 +84,7 @@ function startTerminal(elementId, session, wsUrl, theme) {
 		
         ws.send(JSON.stringify({
             type: 'data',
-            id: session,
+            id: id,
             data: data
         }));
 	        
@@ -98,7 +92,7 @@ function startTerminal(elementId, session, wsUrl, theme) {
 
     new ResizeSensor(terminalParent, _.throttle(function() {
         if (ws.readyState === WebSocket.OPEN) {
-            resizeTerminal(terminal, fitAddon, ws, session);
+            resizeTerminal(terminal, fitAddon, ws, id);
         }
     }, 500));
 

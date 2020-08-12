@@ -3,8 +3,8 @@ package org.springframework.ide.eclipse.terminal.pty;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -24,26 +24,13 @@ public class PtyProcessManager {
 	private Map<String, PtyProcessInfo> processes = new HashMap<>();
 	private ThreadPoolTaskScheduler taskExecutor;
 		
-	private static boolean isWindows() {
-		return System.getProperty("os.name").toLowerCase().contains("win");
-	}
-	
 	public PtyProcessManager(ThreadPoolTaskScheduler taskExecutor) {
 		this.taskExecutor = taskExecutor;
 		
 	}
 	
-	private PtyProcessInfo create(String id, String cwd, Collection<String> ptyParams) throws IOException {
-		String[] cmd = new String[1 + (ptyParams == null ? 0 : ptyParams.size())];
-		cmd[0] = isWindows() ? "powershell.exe" : "/bin/bash";
-		int index = 1;
-		if (ptyParams != null) {
-			for (String param : ptyParams) {
-				cmd[index++] = param;
-			}
-		}
-		
-		PtyProcess pty = PtyProcess.exec(cmd, System.getenv(), cwd, false, false, null);
+	private PtyProcessInfo create(String id, List<String> cmd, String cwd) throws IOException {
+		PtyProcess pty = PtyProcess.exec(cmd.toArray(new String[cmd.size()]), System.getenv(), cwd, false, false, null);
 		PtyProcessInfo processInfo = new PtyProcessInfo(pty, id, taskExecutor);
 		
 		taskExecutor.createThread(() -> {
@@ -52,7 +39,11 @@ public class PtyProcessManager {
 				int length = 0;
 				while ((length = pty.getInputStream().read(buffer)) != -1) {
 					if (length > 0) {
-						broadcastData(processInfo, Arrays.copyOf(buffer, length));
+						try {
+							broadcastData(processInfo, Arrays.copyOf(buffer, length));
+						} catch (Exception e) {
+							log.error("", e);
+						}
 					}
 				}
 			} catch (IOException e) {
@@ -79,10 +70,10 @@ public class PtyProcessManager {
         processInfo.getBuffer().add(msg.getData());
 	}
 	
-	public synchronized PtyProcessInfo createOrConnect(WebSocketSession ws, String id, String cwd, Collection<String> ptyParams) throws IOException {
+	public synchronized PtyProcessInfo createOrConnect(WebSocketSession ws, String id, List<String> cmd, String cwd) throws IOException {
 		PtyProcessInfo processInfo = this.processes.get(id);
 		if (processInfo == null) {
-			processInfo = create(id, cwd, ptyParams);
+			processInfo = create(id, cmd, cwd);
 			this.processes.put(id, processInfo);
 		}
 		connectSocket(ws, processInfo);
