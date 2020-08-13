@@ -28,8 +28,8 @@ public class XtermApplication {
 	}
 	
 	@Bean
-	public PtyProcessManager ptyProcessManager(ThreadPoolTaskScheduler taskExecutor) {
-		return new PtyProcessManager(taskExecutor);
+	public PtyProcessManager ptyProcessManager(PtyProperties ptyProperties, ThreadPoolTaskScheduler taskExecutor) {
+		return new PtyProcessManager(ptyProperties, taskExecutor);
 	}
 	
 	@ConditionalOnProperty(name = {"terminal.auto-shutdown.on"}, havingValue = "true")

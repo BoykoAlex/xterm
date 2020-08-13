@@ -10,6 +10,7 @@ import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.ide.eclipse.terminal.PtyProperties;
 import org.springframework.ide.eclipse.terminal.model.Message;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.web.socket.TextMessage;
@@ -23,8 +24,11 @@ public class PtyProcessManager {
 	
 	private Map<String, PtyProcessInfo> processes = new HashMap<>();
 	private ThreadPoolTaskScheduler taskExecutor;
+
+	private PtyProperties ptyProperties;
 		
-	public PtyProcessManager(ThreadPoolTaskScheduler taskExecutor) {
+	public PtyProcessManager(PtyProperties ptyProperties, ThreadPoolTaskScheduler taskExecutor) {
+		this.ptyProperties = ptyProperties;
 		this.taskExecutor = taskExecutor;
 		
 	}
@@ -88,7 +92,18 @@ public class PtyProcessManager {
 		for (Map.Entry<String, PtyProcessInfo> e : processes.entrySet()) {
 			PtyProcessInfo ptyProcessInfo = e.getValue();
 			if (ptyProcessInfo.sockets.remove(ws)) {
-				ptyProcessInfo.terminationFuture = taskExecutor.getScheduledExecutor().schedule(() -> this.terminatePty(e.getKey()), 60, TimeUnit.SECONDS);
+				
+				switch (ptyProperties.getShutdown()) {
+				case IMMEDIATELY:
+					terminatePty(ptyProcessInfo.getId());
+					break;
+				case DELAY:
+					ptyProcessInfo.terminationFuture = taskExecutor.getScheduledExecutor().schedule(
+							() -> this.terminatePty(e.getKey()), ptyProperties.getShutdownDelay(), TimeUnit.SECONDS);
+					break;
+				default:
+					// Nothing to do - no shutdown
+				}
 				break;
 			}
 		}
