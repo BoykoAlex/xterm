@@ -7,6 +7,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.ide.eclipse.terminal.pty.PtyProcessManager;
+import org.springframework.ide.eclipse.terminal.theme.ThemeRepository;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
@@ -36,6 +37,11 @@ public class XtermApplication {
 	@Bean
 	public AutoShutdown autoshutdown(PtyProcessManager processManager, ThreadPoolTaskScheduler taskExecutor, TerminalAutoShutdownProperties autoShutdownProperties) {
 		return new AutoShutdown(processManager, taskExecutor,Duration.ofSeconds(autoShutdownProperties.getDelay()).toMillis());
+	}
+	
+	@Bean
+	public ThemeRepository themeRepository() {
+		return new ThemeRepository();
 	}
 
 }

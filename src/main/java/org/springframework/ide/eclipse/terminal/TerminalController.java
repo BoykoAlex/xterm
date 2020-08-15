@@ -1,5 +1,8 @@
 package org.springframework.ide.eclipse.terminal;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.ide.eclipse.terminal.theme.Theme;
+import org.springframework.ide.eclipse.terminal.theme.ThemeRepository;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.Assert;
@@ -12,11 +15,15 @@ public class TerminalController {
 	
 	private static final String TERMINAL = "terminal";
 	
+	@Autowired
+	private ThemeRepository themeRepository;
+	
 	@GetMapping("/terminal/{id}")
 	public String terminal(
 			@PathVariable() String id,
 			@RequestParam(required = false) String cmd,
 			@RequestParam(required = false) String cwd,
+			@RequestParam(required = false) String theme,
 			Model model) {
 		String[] cmdArray;
 		Assert.hasText(id, "Id for the terminal must be provided");
@@ -28,6 +35,8 @@ public class TerminalController {
 		model.addAttribute("cwd", cwd);
 		model.addAttribute("id", id);
 		model.addAttribute("cmd", cmdArray);
+		Theme themeObj = theme == null ? null : themeRepository.findTheme(theme);
+		model.addAttribute("theme", themeObj == null ? new Theme() : themeObj);
 		return TERMINAL;
 	}
 	

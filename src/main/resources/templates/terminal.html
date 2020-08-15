@@ -23,6 +23,7 @@
     	const id = [[${id}]];
     	const cmd = [[${cmd}]];
     	const cwd = [[${cwd}]];
+    	const theme = [[${theme}]];
     	
         document.addEventListener('DOMContentLoaded', function() {
             startTerminal(
@@ -30,7 +31,8 @@
             		id,
             		`${window.location.protocol.replace('http', 'ws')}//${window.location.host}/websocket`,
             		cmd,
-            		cwd
+            		cwd,
+            		theme
             );
         });
     	
@@ -38,6 +40,6 @@
     </script>
 </head>
 <body>
-    <div id="terminal"></div>
+    <div id="terminal" th:style="${theme.background} != null ? 'background-color: ' + ${theme.background} + ';' : 'background-color: rgb(0,0,0);'"></div>
 </body>
 </html>
