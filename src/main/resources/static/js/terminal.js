@@ -110,6 +110,6 @@ function startTerminal(elementId, id, wsUrl, cmd, cwd, theme) {
         if (ws.readyState === WebSocket.OPEN) {
             resizeTerminal(terminal, fitAddon, ws, id);
         }
-    }, 500));
+    }, 250));
 
 }
