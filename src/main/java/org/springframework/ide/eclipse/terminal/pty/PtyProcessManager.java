@@ -3,10 +3,12 @@ package org.springframework.ide.eclipse.terminal.pty;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+
+import javax.annotation.PreDestroy;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +24,7 @@ public class PtyProcessManager {
 	
 	private static final Logger log = LoggerFactory.getLogger(PtyProcessManager.class);
 	
-	private Map<String, PtyProcessInfo> processes = new HashMap<>();
+	private Map<String, PtyProcessInfo> processes = new ConcurrentHashMap<>();
 	private ThreadPoolTaskScheduler taskExecutor;
 
 	private PtyProperties ptyProperties;
@@ -74,7 +76,7 @@ public class PtyProcessManager {
         processInfo.getBuffer().add(msg.getData());
 	}
 	
-	public synchronized PtyProcessInfo createOrConnect(WebSocketSession ws, String id, List<String> cmd, String cwd) throws IOException {
+	public PtyProcessInfo createOrConnect(WebSocketSession ws, String id, List<String> cmd, String cwd) throws IOException {
 		PtyProcessInfo processInfo = this.processes.get(id);
 		if (processInfo == null) {
 			processInfo = create(id, cmd, cwd);
@@ -84,11 +86,11 @@ public class PtyProcessManager {
 		return processInfo;
 	}
 	
-	public synchronized PtyProcessInfo get(String id) throws IOException {
+	public PtyProcessInfo get(String id) throws IOException {
 		return this.processes.get(id);
 	}
 	
-	public synchronized void disconnectSocket(WebSocketSession ws) {
+	public void disconnectSocket(WebSocketSession ws) {
 		for (Map.Entry<String, PtyProcessInfo> e : processes.entrySet()) {
 			PtyProcessInfo ptyProcessInfo = e.getValue();
 			if (ptyProcessInfo.sockets.remove(ws)) {
@@ -109,7 +111,7 @@ public class PtyProcessManager {
 		}
 	}
 	
-	private synchronized boolean terminatePty(String id) {
+	private boolean terminatePty(String id) {
 		PtyProcessInfo ptyProcessInfo = processes.get(id);
 		if (ptyProcessInfo != null && ptyProcessInfo.sockets.isEmpty()) {
 			log.info("Terminating pty process for id=" + id);
@@ -120,7 +122,7 @@ public class PtyProcessManager {
 		return false;
 	}
 	
-	private synchronized void connectSocket(WebSocketSession ws, PtyProcessInfo processInfo) {
+	private void connectSocket(WebSocketSession ws, PtyProcessInfo processInfo) {
 		if (processInfo.terminationFuture != null) {
 			processInfo.terminationFuture.cancel(false);
 			processInfo.terminationFuture = null;
@@ -131,5 +133,12 @@ public class PtyProcessManager {
 	public boolean isEmpty() {
 		return processes.isEmpty();
 	}
+	
+    @PreDestroy
+    public void destroy() {
+    	for(String id : processes.keySet()) {
+    		terminatePty(id);
+    	}
+    }
 
 }
