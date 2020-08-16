@@ -22,7 +22,7 @@ function ping(ws) {
 function startTerminal(elementId, id, wsUrl, cmd, cwd, theme) {
 
 	const options = {
-        cursorBlink: true,
+        cursorBlink: false,
         theme: theme,
 	};
 	
