@@ -1,8 +1,6 @@
 package org.springframework.ide.eclipse.terminal;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.ide.eclipse.terminal.theme.Theme;
-import org.springframework.ide.eclipse.terminal.theme.ThemeRepository;
+import org.springframework.ide.eclipse.terminal.model.Theme;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.Assert;
@@ -15,15 +13,18 @@ public class TerminalController {
 	
 	private static final String TERMINAL = "terminal";
 	
-	@Autowired
-	private ThemeRepository themeRepository;
-	
 	@GetMapping("/terminal/{id}")
 	public String terminal(
 			@PathVariable() String id,
 			@RequestParam(required = false) String cmd,
 			@RequestParam(required = false) String cwd,
-			@RequestParam(required = false) String theme,
+			@RequestParam(required = false) String bg,
+			@RequestParam(required = false) String fg,
+			@RequestParam(required = false) String selection,
+			@RequestParam(required = false) String cursor,
+			@RequestParam(required = false) String cursorAccent,
+			@RequestParam(required = false) String fontFamily,
+			@RequestParam(required = false) Integer fontSize,
 			Model model) {
 		String[] cmdArray;
 		Assert.hasText(id, "Id for the terminal must be provided");
@@ -32,11 +33,34 @@ public class TerminalController {
 		} else {
 			cmdArray = defaultShellCommand();
 		}
+		
+		Theme theme = new Theme();
+		if (bg != null) {
+			theme.background = bg;
+		}
+		if (fg != null) {
+			theme.foreground = fg;
+		}
+		if (selection != null) {
+			theme.selection = selection;
+		}
+		if (cursor != null) {
+			theme.cursor = cursor;
+		}
+		if (cursorAccent != null) {
+			theme.cursorAccent = cursorAccent;
+		}
+		if (fontFamily != null) {
+			theme.fontFamily = fontFamily;
+		}
+		if (fontSize != null) {
+			theme.fontSize = fontSize;
+		}
+		
 		model.addAttribute("cwd", cwd);
 		model.addAttribute("id", id);
 		model.addAttribute("cmd", cmdArray);
-		Theme themeObj = theme == null ? null : themeRepository.findTheme(theme);
-		model.addAttribute("theme", themeObj == null ? new Theme() : themeObj);
+		model.addAttribute("theme", theme);
 		return TERMINAL;
 	}
 	
