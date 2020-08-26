@@ -38,13 +38,13 @@
 		<dependency>
 		    <groupId>org.jetbrains.pty4j</groupId>
 		    <artifactId>pty4j</artifactId>
-		    <version>0.9.5</version>
+		    <version>0.9.8</version>
 		</dependency>
 		
 		<dependency>
 		    <groupId>org.webjars.npm</groupId>
 		    <artifactId>xterm</artifactId>
-		    <version>4.4.0</version>
+		    <version>4.8.1</version>
 		</dependency>
 		
 		<dependency>
