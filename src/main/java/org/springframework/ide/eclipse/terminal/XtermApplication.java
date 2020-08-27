@@ -4,7 +4,6 @@ import java.time.Duration;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.ide.eclipse.terminal.pty.PtyProcessManager;
 import org.springframework.scheduling.annotation.EnableAsync;
@@ -32,10 +31,9 @@ public class XtermApplication {
 		return new PtyProcessManager(ptyProperties, taskExecutor);
 	}
 	
-	@ConditionalOnProperty(name = {"terminal.auto-shutdown.on"}, havingValue = "true")
 	@Bean
-	public AutoShutdown autoshutdown(PtyProcessManager processManager, ThreadPoolTaskScheduler taskExecutor, TerminalAutoShutdownProperties autoShutdownProperties) {
-		return new AutoShutdown(processManager, taskExecutor,Duration.ofSeconds(autoShutdownProperties.getDelay()).toMillis());
+	public Shutdown shutdown(PtyProcessManager processManager, ThreadPoolTaskScheduler taskExecutor, ShutdownProperties ShutdownProperties) {
+		return new Shutdown(processManager, taskExecutor,Duration.ofSeconds(ShutdownProperties.getDelay()).toMillis());
 	}
 	
 }

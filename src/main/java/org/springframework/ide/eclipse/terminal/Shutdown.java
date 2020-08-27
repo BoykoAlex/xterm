@@ -12,9 +12,9 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.ide.eclipse.terminal.pty.PtyProcessManager;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 
-public class AutoShutdown implements ApplicationContextAware {
+public class Shutdown implements ApplicationContextAware {
 	
-	private static final Logger log = LoggerFactory.getLogger(AutoShutdown.class);
+	private static final Logger log = LoggerFactory.getLogger(Shutdown.class);
 	
 	private static int PREFERRED_CHECK_PERIOD = 5000;
 	
@@ -22,7 +22,7 @@ public class AutoShutdown implements ApplicationContextAware {
 	private long delay;
 	private Closeable closeableApp;
 	
-	public AutoShutdown(PtyProcessManager processManager, ThreadPoolTaskScheduler taskExecutor, long delay) {
+	public Shutdown(PtyProcessManager processManager, ThreadPoolTaskScheduler taskExecutor, long delay) {
 		this.timeMark = System.currentTimeMillis();
 		this.delay = delay;
 		int period = delay < PREFERRED_CHECK_PERIOD ? 1000 : PREFERRED_CHECK_PERIOD;
@@ -53,6 +53,14 @@ public class AutoShutdown implements ApplicationContextAware {
 	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
 		if (applicationContext instanceof Closeable) {
 			this.closeableApp = (Closeable) applicationContext;
+		}
+	}
+	
+	public void shutdown() throws IOException {
+		if (closeableApp != null) {
+			closeableApp.close();
+		} else {
+			throw new IOException("Cannot shutdown app");
 		}
 	}
 

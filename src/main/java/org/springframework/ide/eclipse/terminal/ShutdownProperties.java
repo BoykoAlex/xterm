@@ -5,7 +5,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @ConfigurationProperties("terminal.auto-shutdown")
-public class TerminalAutoShutdownProperties {
+public class ShutdownProperties {
 	
 	private boolean on = false;
 	private int delay = 60;

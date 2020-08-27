@@ -1,17 +1,26 @@
 package org.springframework.ide.eclipse.terminal;
 
+import java.io.IOException;
+
 import org.springframework.ide.eclipse.terminal.model.Theme;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.util.Assert;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 public class TerminalController {
 	
 	private static final String TERMINAL = "terminal";
+	
+	private Shutdown shutdown;
+	
+	public TerminalController(Shutdown shutdown) {
+		this.shutdown = shutdown;
+	}
 	
 	@GetMapping("/terminal/{id}")
 	public String terminal(
@@ -76,5 +85,9 @@ public class TerminalController {
 		return System.getProperty("os.name").toLowerCase().contains("win");
 	}
 
+	@PostMapping("/shutdown")
+	public void shutdown() throws IOException {
+		shutdown.shutdown();
+	}
 
 }
